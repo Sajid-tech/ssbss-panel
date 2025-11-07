@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.ant-menu,
+.ant-menu * {
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* Custom Scroll */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+}
+/* .custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+} */
+
+/* Ant Menu Item Style - Keep animations and rounding only */
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-submenu-title {
+  /* border-radius: 100px;
+   */
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+  margin: 4px;
+  transition: all 0.2s;
+}
+
+.custom-menu .ant-menu-item:hover,
+.custom-menu .ant-menu-submenu-title:hover {
+  /* border-radius: 100px; */
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+}
+
+.custom-menu .ant-menu-item-selected {
+  /* border-radius: 100px;*/
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+}
+
+/* Icon hover effects (keep if desired) */
+.custom-menu .ant-menu-item:hover .anticon,
+.custom-menu .ant-menu-submenu-title:hover .anticon {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+.custom-menu .anticon {
+  transition: transform 0.2s ease;
+}
+
+/* Submenu items */
+.ant-menu-submenu-popup .ant-menu-item-selected {
+  /* border-radius: 100px !important; */
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+}
+.ant-menu-submenu-popup .ant-menu-item {
+  /* border-radius: 100px !important; */
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.ant-menu-submenu-popup .ant-menu-item::after {
+  /* border-radius: 100px !important; */
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+}
+.ant-menu-submenu-popup .ant-menu-item:hover .anticon {
+  transform: scale(1.2);
+  transition: transform 0.2s ease;
+}
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background-color: #fb6332;
+  color: #ffffff !important;
+}
+/* Force submenu hover text to be white */
+.ant-menu-light .ant-menu-submenu-title:hover {
+  color: #ffffff !important;
+}
+
+/* Optional: also for open submenu items */
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: #ffffff !important;
+  background-color: #fb6332 !important;
+}
+.heading {
+  color: #fb6332 !important;
+}
+/* Scrollbar */
+.scrollbar-custom {
+  overflow: auto;
+  /* scrollbar-width: thin; */
+  scrollbar-color: auto transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+}
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ant-menu-light.ant-menu-root.ant-menu-inline,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-inline,
+.ant-menu-light.ant-menu-root.ant-menu-vertical,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: none !important;
+}
