@@ -25,6 +25,7 @@ import TrusteeMemberReport from "./pages/report/MemberReport/TrusteeMemberReport
 import NotRegisterNotScanned from "./pages/report/NotregisteredNotScanned/NotRegisterNotScanned";
 import RegisteredNotScanned from "./pages/report/registerednotscanned/RegisteredNotScanned";
 import AllMember from "./pages/member/AllMember";
+import AllMemberReport from "./pages/report/MemberReport/AllMemberReport";
 
 // import { Route, Routes } from "react-router-dom";
 // import AppInitializer from "./components/AppInitializer";
@@ -113,6 +114,10 @@ function App() {
                   element={<MemberForm />}
                 />
                 <Route path="/event-details" element={<EventDetailsPage />} />
+                <Route
+                  path="/all-member-report"
+                  element={<AllMemberReport />}
+                />
                 <Route
                   path="/report-life-member"
                   element={<LifeMemberReport />}

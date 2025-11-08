@@ -30,6 +30,11 @@ const getMenuItems = (collapsed) => {
   const eventReportChildren = [
     { key: "/report-event", icon: <CarOutlined />, label: "Event" },
     {
+      key: "/all-member-report",
+      icon: <CarOutlined />,
+      label: "Member",
+    },
+    {
       key: "/report-event-details",
       icon: <CarOutlined />,
       label: "Event Details",
@@ -58,28 +63,7 @@ const getMenuItems = (collapsed) => {
 
 
   const fullReportChildren = [
-    {
-      key: "sales-submenu",
-      icon: <ProfileOutlined />,
-      label: <span id="report-scroll-anchor">Member</span>,
-      children: [
-        {
-          key: "/report-life-member",
-          icon: <ProfileOutlined />,
-          label: "Life Membership",
-        },
-        {
-          key: "/report-couple-member",
-          icon: <ProfileOutlined />,
-          label: "Couple Membership",
-        },
-        {
-          key: "/report-truste-member",
-          icon: <ProfileOutlined />,
-          label: "Trustee",
-        },
-      ],
-    },
+  
     ...eventReportChildren,
   ];
 
@@ -149,6 +133,7 @@ export default function Sidebar({ collapsed, isMobile = false, onClose }) {
   const items = getMenuItems(collapsed);
   const dispatch = useDispatch();
   const finalUserImage = useFinalUserImage();
+
   const [delayedCollapse, setDelayedCollapse] = useState(collapsed);
   const localVersion = useSelector((state) => state.auth?.version);
   const serverVersion = useSelector((state) => state?.version?.version);

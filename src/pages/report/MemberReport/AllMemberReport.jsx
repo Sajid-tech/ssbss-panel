@@ -5,7 +5,7 @@ import { useApiMutation } from "../../../hooks/useApiMutation";
 
 const { TabPane } = Tabs;
 
-const LifeMemberReport = () => {
+const AllMemberReport = () => {
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const { trigger: fetchCategories } = useApiMutation();
@@ -65,4 +65,4 @@ const LifeMemberReport = () => {
   );
 };
 
-export default LifeMemberReport;
+export default AllMemberReport;
