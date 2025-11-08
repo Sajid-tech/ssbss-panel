@@ -13,7 +13,7 @@ import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
 const { Option } = Select;
 
-const MemberReport = ({ title, userTypeFilter }) => {
+const MemberReport = ({ title, categoryFilter }) => {
   const memberRef = useRef(null);
   const [member, setMember] = useState([]);
   const [filteredMember, setFilteredMember] = useState([]);
@@ -28,7 +28,6 @@ const MemberReport = ({ title, userTypeFilter }) => {
         const res = await fetchCategoryReport({
           url: MEMBER_REPORT,
           method: "post",
-  
         });
 
         if (res.code === 201) {
@@ -39,11 +38,17 @@ const MemberReport = ({ title, userTypeFilter }) => {
             );
             setImageBaseUrl(imgUrlObj["User"] || "");
             setNoImageUrl(imgUrlObj["No Image"] || "");
-            const filtered = res.data.filter(
-              (user) => user.user_member_type == userTypeFilter
-            );
-            setMember(filtered);
-            setFilteredMember(filtered);
+            
+            // Filter by category if provided
+            let filteredData = res.data;
+            if (categoryFilter) {
+              filteredData = res.data.filter(
+                (user) => user.user_member_catg_id == categoryFilter
+              );
+            }
+            
+            setMember(filteredData);
+            setFilteredMember(filteredData);
           }
         }
       } catch (error) {
@@ -52,15 +57,16 @@ const MemberReport = ({ title, userTypeFilter }) => {
     };
 
     getReport();
-  }, []);
+  }, [categoryFilter]); // Re-fetch when categoryFilter changes
 
   const handleFilterChange = (value) => {
     if (value == "all") {
       setFilteredMember(member);
     } else {
-      setFilteredMember(member.filter((item) => item.is_active === value));
+      setFilteredMember(member.filter((item) => item.user_status === value));
     }
   };
+
   const handlePrint = useReactToPrint({
     content: () => memberRef.current,
     documentTitle: `${title} Report`,
@@ -80,21 +86,22 @@ const MemberReport = ({ title, userTypeFilter }) => {
        }
      `,
   });
+
   return (
     <>
       <Card
         title={title || ""}
         className="shadow-md rounded-lg"
         extra={
-          <div className="flex  items-center gap-2">
+          <div className="flex items-center gap-2">
             <Select
               defaultValue="all"
               style={{ width: 150 }}
               onChange={handleFilterChange}
             >
               <Option value="all">All</Option>
-              <Option value="active">Active</Option>
-              <Option value="inactive">Inactive</Option>
+              <Option value="Active">Active</Option>
+              <Option value="Inactive">Inactive</Option>
             </Select>
 
             <Tooltip title="Print Report">
@@ -142,7 +149,7 @@ const MemberReport = ({ title, userTypeFilter }) => {
             <>
               <div className="flex justify-between mb-2">
                 <h2 className="text-xl font-semibold">{title || ""} Report</h2>
-                <h2>Total:{member.length || 0}</h2>
+                <h2>Total: {filteredMember.length || 0}</h2>
               </div>
               <table
                 className="w-full border rounded-md table-fixed text-[14px]"
@@ -159,6 +166,9 @@ const MemberReport = ({ title, userTypeFilter }) => {
                     <th className="px-3 py-2 text-center w-[100px]">
                       Whatsapp
                     </th>
+                    <th className="px-3 py-2 text-center w-[100px]">
+                      Status
+                    </th>
                   </tr>
                 </thead>
 
@@ -170,7 +180,7 @@ const MemberReport = ({ title, userTypeFilter }) => {
                       style={{
                         pageBreakInside: "avoid",
                         backgroundColor:
-                          item.is_active == "inactive"
+                          item.user_status === "Inactive"
                             ? "#ffe5e5"
                             : "transparent",
                       }}
@@ -191,22 +201,6 @@ const MemberReport = ({ title, userTypeFilter }) => {
                             }}
                           />
                         </div>
-                        {item.user_member_type == "Couple Membership" && (
-                          <div className="w-[40px] h-[40px] rounded overflow-hidden">
-                            <Image
-                              width={40}
-                              height={40}
-                              src={`${imageBaseUrl}${item.spouse_image}`}
-                              fallback={noImageUrl}
-                              alt="Spouse"
-                              style={{
-                                objectFit: "cover",
-                                width: "100%",
-                                height: "100%",
-                              }}
-                            />
-                          </div>
-                        )}
                       </td>
 
                       <td className="py-2 font-medium break-words">
@@ -228,6 +222,9 @@ const MemberReport = ({ title, userTypeFilter }) => {
                       <td className="px-3 py-2 text-center">
                         {item.user_whatsapp}
                       </td>
+                      <td className="px-3 py-2 text-center">
+                        {item.user_status}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -235,7 +232,7 @@ const MemberReport = ({ title, userTypeFilter }) => {
             </>
           ) : (
             <div className="text-center text-gray-500 py-20">
-              No data found.
+              No data found for {title}.
             </div>
           )}
         </div>
@@ -243,4 +240,5 @@ const MemberReport = ({ title, userTypeFilter }) => {
     </>
   );
 };
+
 export default MemberReport;

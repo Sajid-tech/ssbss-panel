@@ -58,10 +58,7 @@ const NewRegisterationList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { trigger, loading: isMutating } = useApiMutation();
   const [users, setUsers] = useState([]);
-  const [imageUrls, setImageUrls] = useState({
-    userImageBase: "",
-    noImage: "",
-  });
+  
   const navigate = useNavigate();
 
   const fetchUser = async () => {
@@ -72,17 +69,7 @@ const NewRegisterationList = () => {
     if (Array.isArray(res.data)) {
       setUsers(res.data);
 
-      const userImageObj = res.image_url?.find(
-        (img) => img.image_for == "User"
-      );
-      const noImageObj = res.image_url?.find(
-        (img) => img.image_for == "No Image"
-      );
-
-      setImageUrls({
-        userImageBase: userImageObj?.image_url || "",
-        noImage: noImageObj?.image_url || "",
-      });
+      
     }
   };
 
@@ -90,36 +77,10 @@ const NewRegisterationList = () => {
     fetchUser();
   }, []);
 
-  const handleEdit = (user) => {
-    navigate(`/new-registration-form/${user.id}`);
+  const handleEdit = (record) => {
+    navigate(`/new-registration-form/${record.id}`);
   };
 
-  const handleToggleStatus = async (user) => {
-    try {
-      const newStatus =
-        user.user_status == "active" || user.user_status == true
-          ? "inactive"
-          : "active";
-      const res = await trigger({
-        url: `${REGESTRATION_DATA}s/${user.id}/status`,
-        method: "patch",
-        data: { user_status: newStatus },
-      });
-
-      if (res?.code === 201) {
-        message.success(
-          res.message ||
-            `User marked as ${newStatus == "active" ? "Active" : "Inactive"}`
-        );
-        fetchUser();
-      } else {
-        message.error(res.message || "Failed to update user status.");
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-      message.error(error.message || "Error updating user status.");
-    }
-  };
   const handleDelete = async (user) => {
     try {
       const res = await trigger({
@@ -131,161 +92,124 @@ const NewRegisterationList = () => {
         message.success(res.message || "Deleted user successfully.");
         fetchUser();
       } else {
-        message.error(res.message || "Failed to deleted user status.");
+        message.error(res.message || "Failed to delete user.");
       }
     } catch (error) {
-      message.error(error.message || "Error deleted user status.");
+      message.error(error.message || "Error deleting user.");
     }
   };
-  const handleConvert = async (user) => {
-    try {
-      const res = await trigger({
-        url: CONVERT_NEW_REGISTRATION_TO_MEMEBER,
-        method: "post",
-        data: { member_id: user.id },
-      });
 
-      if (res?.code === 201) {
-        message.success(res.message || "Convert user successfully.");
-      } else {
-        message.error(res.message || "Failed to convert.");
-      }
-    } catch (error) {
-      message.error(error.message || "Error converting ");
-    }
-  };
-  const columns = [
-    {
-      title: "",
-      key: "member_images",
-      width: 180,
-      render: (_, user) => (
-        <div className="flex justify-center gap-2">
-          <AvatarCell
-            src={
-              user.user_image
-                ? `${imageUrls.userImageBase}${
-                    user.user_image
-                  }?v=${Math.random()}`
-                : imageUrls.noImage
-            }
-          />
-          {user.user_type === "Couple Membership" && (
-            <AvatarCell
-              size={38}
-              src={
-                user.spouse_image
-                  ? `${imageUrls.userImageBase}${
-                      user.spouse_image
-                    }?v=${Math.random()}`
-                  : imageUrls.noImage
-              }
-            />
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Full Name",
-      dataIndex: "user_full_name",
-      key: "user_full_name",
-      render: (_, user) => highlightMatch(user.user_full_name, user._match),
-    },
-    {
-      title: "DOB",
-      dataIndex: "user_dob",
-      key: "user_dob",
-      render: (_, user) =>
-        highlightMatch(dayjs(user.user_dob).format("DD-MM-YYYY"), user._match),
-    },
-    {
-      title: "Mobile",
-      dataIndex: "user_mobile",
-      key: "user_mobile",
-      render: (_, user) => (
-        <a href={`tel:${user.user_mobile}`} className="heading">
-          {highlightMatch(user.user_mobile, user._match)}
-        </a>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "user_status",
-      key: "user_status",
-      render: (_, user) => {
-        const isActive = user.user_status == "active";
-        return (
-          <Popconfirm
-            title={`Mark New Registeration as ${
-              isActive ? "Inactive" : "Active"
-            }?`}
-            onConfirm={() => handleToggleStatus(user)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Tag
-              color={isActive ? "green" : "red"}
-              icon={isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-              className="cursor-pointer"
-            >
-              {isActive ? "Active" : "Inactive"}
-            </Tag>
-          </Popconfirm>
-        );
+  const getDynamicColumns = (data) => {
+    if (!data.length) return [];
+
+    const availableKeys = Object.keys(data[0]);
+
+    const baseColumns = [
+      {
+        title: "Event Name",
+        dataIndex: "event_name",
+        key: "event_name",
+        render: (_, record) => highlightMatch(record.event_name, record._match),
       },
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      render: (_, id) => (
-        <Space>
-          <Tooltip title="Edit New Registration ">
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              size="small"
-              onClick={() => handleEdit(id)}
-            />
-          </Tooltip>
-          {(userType == "3" || userType == "4") && (
-            <Tooltip title="Delete New Registration ">
-              <Popconfirm
-                title="Are you sure you want to delete this user?"
-                onConfirm={() => handleDelete(id)}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  type="primary"
-                  danger
-                />
-              </Popconfirm>
-            </Tooltip>
-          )}
-          <Tooltip title="Convert">
-            <Popconfirm
-              title="Are you sure you need to convert?"
-              onConfirm={() => handleConvert(id)}
-              okText="Yes"
-              cancelText="No"
-            >
+      {
+        title: "Name",
+        dataIndex: "event_register_name",
+        key: "event_register_name",
+        render: (_, record) =>
+          highlightMatch(record.event_register_name, record._match),
+      },
+      {
+        title: "Mobile",
+        dataIndex: "event_register_mobile",
+        key: "event_register_mobile",
+        render: (_, record) => (
+          <a href={`tel:${record.event_register_mobile}`} className="heading">
+            {highlightMatch(record.event_register_mobile, record._match)}
+          </a>
+        ),
+      },
+      {
+        title: "Email",
+        dataIndex: "event_register_email",
+        key: "event_register_email",
+        render: (_, record) =>
+          highlightMatch(record.event_register_email, record._match),
+      },
+      {
+        title: "Amount",
+        dataIndex: "event_register_amount",
+        key: "event_register_amount",
+        render: (_, record) => `₹${record.event_register_amount}`,
+      },
+      {
+        title: "Member ID",
+        dataIndex: "event_register_mid",
+        key: "event_register_mid",
+        render: (value) => value || "-",
+      },
+      {
+        title: "Payment Type",
+        dataIndex: "event_register_payment_type",
+        key: "event_register_payment_type",
+        render: (value) => value || "-",
+      },
+      {
+        title: "Transaction ID",
+        dataIndex: "event_register_transaction",
+        key: "event_register_transaction",
+        render: (value) => value || "-",
+      },
+      {
+        title: "Register Date",
+        dataIndex: "event_register_date",
+        key: "event_register_date",
+        render: (_, record) =>
+          dayjs(record.event_register_date).format("DD-MM-YYYY"),
+      },
+      {
+        title: "Actions",
+        key: "actions",
+        render: (_, record) => (
+          <Space>
+            <Tooltip title="Edit Registration">
               <Button
-                icon={<UserSwitchOutlined />}
-                size="small"
                 type="primary"
+                icon={<EditOutlined />}
+                size="small"
+                onClick={() => handleEdit(record)}
               />
-            </Popconfirm>
-          </Tooltip>
-        </Space>
-      ),
-      width: 130,
-    },
-  ];
+            </Tooltip>
+            {(userType == "3" || userType == "4") && (
+              <Tooltip title="Delete Registration">
+                <Popconfirm
+                  title="Are you sure you want to delete this registration?"
+                  onConfirm={() => handleDelete(record)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button
+                    icon={<DeleteOutlined />}
+                    size="small"
+                    type="primary"
+                    danger
+                  />
+                </Popconfirm>
+              </Tooltip>
+            )}
+          </Space>
+        ),
+        width: 130,
+      },
+    ];
+
+    return baseColumns.filter(
+      (col) =>
+        availableKeys.includes(col.dataIndex) ||
+        ["actions"].includes(col.key)
+    );
+  };
 
   const filteredUsers = users
-
     .map((user) => {
       const flatString = Object.values(user)
         .filter((v) => typeof v === "string" || typeof v === "number")
@@ -297,10 +221,12 @@ const NewRegisterationList = () => {
     })
     .filter(Boolean);
 
+  const columns = getDynamicColumns(users);
+
   return (
     <Card
       title={
-        <h2 className="text-2xl font-bold heading">New Registration List</h2>
+        <h2 className="text-2xl font-bold heading">Event Registration List</h2>
       }
       extra={
         <div className="flex-1 flex gap-4 sm:justify-end">

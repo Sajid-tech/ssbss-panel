@@ -30,7 +30,7 @@ const EventAttendMember = () => {
 
   const fetchUser = async () => {
     const res = await trigger({
-      url: `${EVENT}s/${id}${REGESTRATION_DATA}`,
+      url: `${EVENT}s/${id}/member`,
     });
 
     if (Array.isArray(res.data)) {
