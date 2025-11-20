@@ -57,7 +57,7 @@ const MemberReport = ({ title, categoryFilter }) => {
     };
 
     getReport();
-  }, [categoryFilter]); // Re-fetch when categoryFilter changes
+  }, [categoryFilter]); 
 
   const handleFilterChange = (value) => {
     if (value == "all") {
@@ -66,7 +66,24 @@ const MemberReport = ({ title, categoryFilter }) => {
       setFilteredMember(member.filter((item) => item.user_status === value));
     }
   };
-
+  const handlePaymentFilterChange = (value) => {
+    if (value == "all") {
+      setFilteredMember(member);
+    } else if (value == "paid") {
+      setFilteredMember(member.filter((item) => item.payment_made?.toLowerCase() === "yes"));
+    } else if (value == "non-paid") {
+      setFilteredMember(member.filter((item) => item.payment_made?.toLowerCase() !== "yes"));
+    }
+  };
+  const handleIssuedFilterChange = (value) => {
+    if (value == "all") {
+      setFilteredMember(member);
+    } else if (value == "issued") {
+      setFilteredMember(member.filter((item) => item.id_card_taken?.toLowerCase() === "yes"));
+    } else if (value == "non-issued") {
+      setFilteredMember(member.filter((item) => item.id_card_taken?.toLowerCase() !== "yes"));
+    }
+  };
   const handlePrint = useReactToPrint({
     content: () => memberRef.current,
     documentTitle: `${title} Report`,
@@ -94,6 +111,16 @@ const MemberReport = ({ title, categoryFilter }) => {
         className="shadow-md rounded-lg"
         extra={
           <div className="flex items-center gap-2">
+               <Select
+                defaultValue="all"
+                style={{ width: 150 }}
+                onChange={handlePaymentFilterChange}
+              >
+                <Option value="all">All Payment</Option>
+                <Option value="paid">Paid</Option>
+                <Option value="non-paid">Non-Paid</Option>
+              </Select>
+  
             <Select
               defaultValue="all"
               style={{ width: 150 }}
@@ -103,6 +130,17 @@ const MemberReport = ({ title, categoryFilter }) => {
               <Option value="Active">Active</Option>
               <Option value="Inactive">Inactive</Option>
             </Select>
+           
+            <Select
+              defaultValue="all"
+              style={{ width: 150 }}
+              onChange={handleIssuedFilterChange}
+            >
+              <Option value="all">All Issued</Option>
+              <Option value="issued">Issued</Option>
+              <Option value="non-issued">Non-Issued</Option>
+            </Select>
+           
 
             <Tooltip title="Print Report">
               <Button
@@ -152,83 +190,65 @@ const MemberReport = ({ title, categoryFilter }) => {
                 <h2>Total: {filteredMember.length || 0}</h2>
               </div>
               <table
-                className="w-full border rounded-md table-fixed text-[14px]"
-                style={{ width: "100%", borderCollapse: "collapse" }}
-              >
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-3 py-2 text-left w-[120px]">Image</th>
-                    <th className="py-2 text-left w-[50px]">MID</th>
-                    <th className="px-3 py-2 text-left">Name</th>
-                    <th className="px-3 py-2 text-left w-[120px]">DOB</th>
-                    <th className="px-3 py-2 text-center w-[180px]">Email</th>
-                    <th className="px-3 py-2 text-center w-[100px]">Mobile</th>
-                    <th className="px-3 py-2 text-center w-[100px]">
-                      Whatsapp
-                    </th>
-                    <th className="px-3 py-2 text-center w-[100px]">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
+  className="w-full border rounded-md text-[14px] table-auto"
+  style={{ borderCollapse: "collapse" }}
+>
+  <thead className="bg-gray-100">
+    <tr>
+      <th className="px-3 py-2 text-left">Image</th>
+      <th className="px-3 py-2 text-left">MID</th>
+      <th className="px-3 py-2 text-left">Name</th>
+      <th className="px-3 py-2 text-left">DOB</th>
+      <th className="px-3 py-2 text-center">Email</th>
+      <th className="px-3 py-2 text-center">Mobile</th>
+      <th className="px-3 py-2 text-center">Whatsapp</th>
+      <th className="px-3 py-2 text-center">Status</th>
+    </tr>
+  </thead>
 
-                <tbody>
-                  {filteredMember.map((item) => (
-                    <tr
-                      key={item.user_mid}
-                      className="border-t"
-                      style={{
-                        pageBreakInside: "avoid",
-                        backgroundColor:
-                          item.user_status === "Inactive"
-                            ? "#ffe5e5"
-                            : "transparent",
-                      }}
-                    >
-                      <td className="px-3 py-2 flex gap-2">
-                        {/* User Image */}
-                        <div className="w-[40px] h-[40px] rounded overflow-hidden">
-                          <Image
-                            width={40}
-                            height={40}
-                            src={`${imageBaseUrl}${item.user_image}`}
-                            fallback={noImageUrl}
-                            alt="User"
-                            style={{
-                              objectFit: "cover",
-                              width: "100%",
-                              height: "100%",
-                            }}
-                          />
-                        </div>
-                      </td>
+  <tbody>
+    {filteredMember.map((item) => (
+      <tr
+        key={item.user_mid}
+        className="border-t"
+        style={{
+          pageBreakInside: "avoid",
+          backgroundColor:
+            item.user_status === "Inactive" ? "#ffe5e5" : "transparent",
+        }}
+      >
+        <td className="px-3 py-2 flex gap-2 min-w-[70px]">
+          <div className="w-[40px] h-[40px] rounded overflow-hidden">
+            <Image
+              width={40}
+              height={40}
+              src={`${imageBaseUrl}${item.user_image}`}
+              fallback={noImageUrl}
+              alt="User"
+              style={{
+                objectFit: "cover",
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          </div>
+        </td>
 
-                      <td className="py-2 font-medium break-words">
-                        {item.user_mid}
-                      </td>
-                      <td className="px-3 py-2 font-medium break-words whitespace-pre-wrap min-w-0">
-                        {item.name}
-                      </td>
-                      <td className="px-3 py-2 break-words whitespace-pre-wrap min-w-0">
-                        {item.user_dob
-                          ? dayjs(item.user_dob).format("DD-MMM-YYYY")
-                          : ""}
-                      </td>
-                      <td className="px-3 py-2 text-center break-words whitespace-pre-wrap min-w-0">
-                        {item.email}
-                      </td>
-                      <td className="px-3 py-2 text-center">{item.mobile}</td>
+        <td className="py-2 font-medium break-words">{item.user_mid}</td>
+        <td className="px-3 py-2 font-medium break-words">{item.name}</td>
+        <td className="px-3 py-2 break-words">
+          {item.user_dob ? dayjs(item.user_dob).format("DD-MMM-YYYY") : ""}
+        </td>
+        <td className="px-3 py-2 text-center break-words">{item.email}</td>
+        <td className="px-3 py-2 text-center">{item.mobile}</td>
+        <td className="px-3 py-2 text-center">{item.user_whatsapp}</td>
+        <td className="px-3 py-2 text-center">{item.user_status}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
-                      <td className="px-3 py-2 text-center">
-                        {item.user_whatsapp}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        {item.user_status}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
             </>
           ) : (
             <div className="text-center text-gray-500 py-20">

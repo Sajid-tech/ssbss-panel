@@ -37,6 +37,7 @@ const AllMember = () => {
   });
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("all"); // Default to "all" tab
+  const [paymentFilter, setPaymentFilter] = useState("all"); // all, paid, non-paid
 
   // Fetch all members
   const fetchUser = async () => {
@@ -120,6 +121,12 @@ const AllMember = () => {
   // Handle tab change
   const handleTabChange = (key) => {
     setActiveTab(key);
+    setPaymentFilter("all"); // Reset payment filter when tab changes
+  };
+
+  // Handle payment filter change
+  const handlePaymentFilter = (filter) => {
+    setPaymentFilter(filter);
   };
 
   // Highlight search matches
@@ -169,7 +176,7 @@ const AllMember = () => {
     );
   };
 
-  // Filter users based on active tab and search term
+  // Filter users based on active tab, payment filter and search term
   const getFilteredUsers = () => {
     let filteredByCategory = users;
 
@@ -180,8 +187,21 @@ const AllMember = () => {
       );
     }
 
+    // Filter by payment status
+    let filteredByPayment = filteredByCategory;
+    if (paymentFilter !== "all") {
+      filteredByPayment = filteredByCategory.filter(user => {
+        if (paymentFilter === "paid") {
+          return user.payment_made?.toLowerCase() === "yes";
+        } else if (paymentFilter === "non-paid") {
+          return user.payment_made?.toLowerCase() !== "yes";
+        }
+        return true;
+      });
+    }
+
     // Then filter by search term
-    return filteredByCategory
+    return filteredByPayment
       .map((user) => {
         const flatString = Object.values(user)
           .filter((v) => typeof v === "string" || typeof v === "number")
@@ -194,6 +214,29 @@ const AllMember = () => {
   };
 
   const filteredUsers = getFilteredUsers();
+
+  // Get counts for payment filter buttons
+  const getPaymentCounts = () => {
+    let categoryUsers = users;
+    
+    if (activeTab !== "all") {
+      categoryUsers = users.filter(user => 
+        user.user_member_catg_id?.toString() === activeTab
+      );
+    }
+
+    const paidCount = categoryUsers.filter(user => 
+      user.payment_made?.toLowerCase() === "yes"
+    ).length;
+
+    const nonPaidCount = categoryUsers.filter(user => 
+      user.payment_made?.toLowerCase() !== "yes"
+    ).length;
+
+    return { paidCount, nonPaidCount };
+  };
+
+  const { paidCount, nonPaidCount } = getPaymentCounts();
 
   // Table columns
   const columns = [
@@ -252,11 +295,24 @@ const AllMember = () => {
       render: (text) => highlightMatch(text || "N/A", searchTerm),
     },
     {
+      title: "Old Id Card",
+      dataIndex: "id_card_type",
+      key: "id_card_type",
+      render: (text) => highlightMatch(text, searchTerm),
+    },
+    {
       title: "Member Category",
       dataIndex: "member_category",
       key: "member_category",
       render: (text) => highlightMatch(text, searchTerm),
     },
+    {
+      title: "Id Card Issued",
+      dataIndex: "id_card_taken",
+      key: "id_card_taken",
+      render: (text) => highlightMatch(text, searchTerm),
+    },
+   
     {
       title: "Status",
       dataIndex: "user_status",
@@ -281,6 +337,19 @@ const AllMember = () => {
               </Tag>
             </Popconfirm>
           </div>
+        );
+      },
+    },
+    {
+      title: "Payment",
+      dataIndex: "payment_made",
+      key: "payment_made",
+      render: (text) => {
+        const isPaid = text?.toLowerCase() === "yes";
+        return (
+          <Tag color={isPaid ? "green" : "red"}>
+            {isPaid ? "Paid" : "Non-Paid"}
+          </Tag>
         );
       },
     },
@@ -325,7 +394,7 @@ const AllMember = () => {
         activeKey={activeTab} 
         onChange={handleTabChange}
         type="card"
-        className="mb-6"
+        className="mb-4"
         items={[
           {
             key: "all",
@@ -337,6 +406,28 @@ const AllMember = () => {
           }))
         ]}
       />
+
+      {/* Payment Filter Buttons */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          type={paymentFilter === "all" ? "primary" : "default"}
+          onClick={() => handlePaymentFilter("all")}
+        >
+          All ({filteredUsers.length})
+        </Button>
+        <Button
+          type={paymentFilter === "paid" ? "primary" : "default"}
+          onClick={() => handlePaymentFilter("paid")}
+        >
+          Paid ({paidCount})
+        </Button>
+        <Button
+          type={paymentFilter === "non-paid" ? "primary" : "default"}
+          onClick={() => handlePaymentFilter("non-paid")}
+        >
+          Non-Paid ({nonPaidCount})
+        </Button>
+      </div>
 
       <div className="min-h-[27rem]">
         {isMutating ? (
