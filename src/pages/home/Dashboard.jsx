@@ -1,10 +1,8 @@
 import {
   CalendarOutlined,
   CrownOutlined,
-  HeartOutlined,
   IdcardOutlined,
   TeamOutlined,
-  UserAddOutlined,
 } from "@ant-design/icons";
 import { Card, Spin, Typography } from "antd";
 import { useEffect, useState } from "react";
@@ -31,49 +29,72 @@ const Dashboard = () => {
     fetchDashboard();
   }, []);
 
-  const cardItems = [
-    {
-      title: "New Registration",
-      count: data?.totalNewRegistration || 0,
-      icon: <UserAddOutlined />,
+  // Map category names to icons and paths
+  const getCategoryConfig = (categoryName) => {
+    const configMap = {
+      "Founder Trustee": {
+        icon: <CrownOutlined />,
+        color: "#eb2f96",
+        path: "/founder-trustee"
+      },
+      "Premier Trustee": {
+        icon: <CrownOutlined />,
+        color: "#722ed1",
+        path: "/premier-trustee"
+      },
+      "Lifetime Trustee": {
+        icon: <CrownOutlined />,
+        color: "#faad14",
+        path: "/lifetime-trustee"
+      },
+      "Patron Trustee": {
+        icon: <CrownOutlined />,
+        color: "#13c2c2",
+        path: "/patron-trustee"
+      },
+      "Life Member": {
+        icon: <IdcardOutlined />,
+        color: "#52c41a",
+        path: "/life-member"
+      }
+    };
+    
+    return configMap[categoryName] || {
+      icon: <TeamOutlined />,
       color: "#1677ff",
-      path: "/new-registration-list",
-    },
+      path: "/members"
+    };
+  };
+
+  // Create card items from categoryCounts
+  const categoryCards = data?.categoryCounts?.map(category => {
+    const config = getCategoryConfig(category.member_category);
+    return {
+      title: category.member_category,
+      count: category.user_count,
+      icon: config.icon,
+      color: config.color,
+      path: config.path
+    };
+  }) || [];
+
+  // Add Total Member card and Active Event card separately
+  const allCards = [
     {
       title: "Member",
       count: data?.totalMember || 0,
       icon: <TeamOutlined />,
-      color: "#52c41a",
-      path: "",
+      color: "#1677ff",
+      path: "/members",
     },
-    {
-      title: "Life Membership",
-      count: data?.totallifemembership || 0,
-      icon: <IdcardOutlined />,
-      color: "#faad14",
-      path: "/life-member",
-    },
-    {
-      title: "Trustee",
-      count: data?.totalTrustee || 0,
-      icon: <CrownOutlined />,
-      color: "#eb2f96",
-      path: "/truste-member",
-    },
-    {
-      title: "Couple Membership",
-      count: data?.totalcouplemembership || 0,
-      icon: <HeartOutlined />,
-      color: "#13c2c2",
-      path: "/couple-member",
-    },
+    ...categoryCards,
     {
       title: "Active Event",
       count: data?.totalActiveEvent || 0,
       icon: <CalendarOutlined />,
-      color: "#722ed1",
+      color: "#1890ff",
       path: "/event",
-    },
+    }
   ];
 
   return (
@@ -85,15 +106,15 @@ const Dashboard = () => {
       ) : (
         <div className="p-4 space-y-6">
           <Title level={3}>Dashboard</Title>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {cardItems.map((item, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {allCards.map((item, index) => (
               <Card
                 key={index}
                 className="shadow-md rounded-xl hover:shadow-lg transition duration-300 cursor-pointer"
                 styles={{
                   body: { padding: "16px" },
                 }}
-                onClick={() => navigate(item.path)}
+                onClick={() => item.path && navigate(item.path)}
               >
                 <div className="flex flex-col items-center justify-center space-y-2 text-center">
                   <div

@@ -13,6 +13,7 @@ import { downloadPDF } from "../../../components/pdfExport/pdfExport";
 import { useApiMutation } from "../../../hooks/useApiMutation";
 import EventCard from "../EventDetailsReport/EventCard";
 import { exportRegisterNotScannedToExcel } from "../../../components/exportExcel/exportRegisterNotScannedToExcel";
+
 const RegisteredNotScanned = () => {
   const { message } = App.useApp();
   const [form] = Form.useForm();
